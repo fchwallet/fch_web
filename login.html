@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ko" lang="ko">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Fchwallet-SPV Wallet</title>
+    <link rel=icon href=/favicon.ico type="image/x-icon" sizes="32x32">   
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
+    <style>
+      body {
+        margin: 0;
+      }
+      #container {
+        background: linear-gradient(to top right, #000d2f, #00015f);
+        color: white;
+        font-family: Roboto;
+        font-size: 18px;
+        text-align: center;
+        min-height: 100vh;
+        width: 100%;
+      }
+      #container>div {
+        margin-top: 30px;
+      }
+      #container>div:first-child {
+        margin-top: 0px;
+        padding-top: 60px;
+      }
+      #container>div:last-child {
+        padding-bottom: 30px;
+      }
+      #pad {
+        //margin-bottom: 0px !important;
+        //padding-bottom: 30px;
+      }
+      #logo>img {
+        height: 200px;
+        width: 200px;
+        border-radius: 20px;
+      }
+      #app-name {
+        font-size: 2em;
+      }
+      #sub {
+        font-size: 1.1em;
+      }
+      #google-play {
+        width: 300px;
+      }
+      #app-store {
+        width: 300px;
+      }
+      #contact table {
+        text-align: left;
+        max-width: 300px;
+        display: inline-block;
+      }
+      #contact td {
+        padding: 10px 5px;
+      }
+      a {
+        color: yellow !important;
+        text-decoration: none !important;
+      }
+      #qr img {
+        height: 150px;
+        width: 150px;
+      }
+      #paymail {
+        font-size: 12px;
+      }
+      #address {
+        font-size: 12px;
+      }
+      #copyright {
+        font-size: 12px;
+      }
+	  #qrcode{
+		    position: relative;
+		    margin: 0 auto;
+		}
+	  .parent {
+          width:250px; 
+          height:250px; 
+          /* border:2px solid #000; */
+          display: inline-grid;
+          justify-content:center;
+          align-items:center;
+          background-color: white;    
+	   }
+	   .child {
+            width:185px;
+            height:185px;
+            margin: auto;  
+            /* position: absolute;  */ 
+            top: 0; left: 0; bottom: 0; right: 0; 
+            justify-content:center;
+		}
+    </style>
+
+  </head>
+
+  <body>
+	
+    <div id="container">
+      <div id="logo"><img src='img/fch.png'></div>
+      <div id="app-name">Fchwallet </div>
+      <div id="sub">Freely Send & Receive Freecash</div>
+      <div id="contact">
+        <table width="400">    
+            <tr>
+			  <td bgcolor="#FFFFFF"><div id="qrcode"></div></td>
+            </tr>
+        </table>
+		<input id="text" type="hidden"/>
+      </div>
+     
+    </div>
+	
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+	<script type="text/javascript" src="./js/q.js"></script>
+	<script>
+	
+		var oTimer = null; 
+		var cmsg = null;
+		
+		$(function() { 
+		
+			var msg = randomString(10);
+			var url = "http://123:8181/rest/hm/test/getMsg"
+			var connet = '{"cid":"app","msg":"'+msg+'","url":"'+url+'"}';
+			
+			$("#text").val(connet)
+			
+			var qrcode = new QRCode(document.getElementById("qrcode"), {
+									width : 250,
+									height : 250
+									
+			});
+		
+				function makeCode () {		
+									qrcode.makeCode(connet);
+								}
+									
+								makeCode();
+			
+			setMsg(msg);
+			
+			
+			cmsg = msg;
+			jQuery(document).ready(function(){
+				oTimer = setInterval("getStatus()",5000);
+			});
+			
+			
+			
+		});
+		
+		
+		function randomString(len) {
+  　　		len = len || 32;
+  　　		var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';    
+  　　		var maxPos = $chars.length;
+  　　		var pwd = '';
+  　　		for (i = 0; i < len; i++) {
+  　　　　		pwd += $chars.charAt(Math.floor(Math.random() * maxPos));
+  　　		}
+ 　　		return pwd;
+ 		}
+		
+	
+		
+		function setMsg(msg) {
+		
+			$.ajax({
+				url: 'http://123:8181/rest/hm/test/msg',
+				type: 'POST',
+				dataType: 'json',
+				data: {
+					msg: msg
+				},
+				success: function(){
+					 
+				},
+				error: function(){
+					  
+				}
+			})
+		
+		}
+		
+		
+		function getStatus() {
+	
+		
+			$.ajax({
+				url: 'http://123:8181/rest/hm/test/getStatus',
+				type: 'POST',
+				dataType: 'json',
+				data: {
+					msg: cmsg
+				},
+				success: function(datas){
+				    var o = JSON.stringify(datas)
+				    var obj = JSON.parse(o);
+				    if (obj.status == true) {
+					  window.clearInterval(oTimer);
+					  window.location.href="index.html#&id="+obj.id;
+				    } 
+				},
+				error: function(){
+					alert('重新刷新页面');
+					window.clearInterval(oTimer);   
+				}
+			})
+		
+		}
+
+		
+	</script>
+	
+  </body>
+
+</html>
